@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_anime_app/screens/CardRow.dart';
 
 class Home extends StatelessWidget {
 
@@ -11,13 +12,14 @@ class Home extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
         Container(
           height: 50,
           decoration: BoxDecoration(
-              color: Colors.white,
+              color: Colors.white70,
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.5),
@@ -39,17 +41,14 @@ class Home extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.all(8),
               children: <Widget>[
-                Container(
-                  height: 100,
-                  color: Colors.amber[600],
-                  child: const Center(child: Text('Entry A')),
-                ),
-                Container(
-                  height: 100,
-                  color: Colors.amber[500],
-                  child: const Center(child: Text('Entry B')),
-                ),
-                Container(
+                new CardRow(),
+                new CardRow(),
+                new CardRow(),
+                new CardRow(),
+                new CardRow(),
+                new CardRow(),
+
+                /*    Container(
                   height: 100,
                   color: Colors.amber[100],
                   child: const Center(child: Text('Entry C')),
@@ -63,7 +62,7 @@ class Home extends StatelessWidget {
                   height: 100,
                   color: Colors.amber[100],
                   child: const Center(child: Text('Entry C')),
-                ),
+                ), */
               ]
             )
         )
