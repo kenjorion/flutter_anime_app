@@ -1,11 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_anime_app/components/custom_navigation_bar.dart';
 import 'package:flutter_anime_app/layouts/body_main.dart';
+import 'package:flutter_anime_app/screens/characters_screen.dart';
+import 'package:flutter_anime_app/screens/details_screen.dart';
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
+
+  static int navigationScreenIndex = 0;
+  static int detailsScreenIndex = 1;
+  static int charactersScreenIndex = 2;
+
+  static int homePageIndex = 0;
+  static int favoritePageIndex = 1;
+
+  static int topTabMoviesIndex = 0;
+  static int topTabSeriesIndex = 1;
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -30,46 +43,82 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
 
-  int _currentIndex = 0;
+  int _currentPageIndex;
+  int _currentScreenIndex;
+  int _currentTopTabIndex;
+
   List<Widget> _topTabs = [ Tab(text: "Films"), Tab(text: "Séries") ];
   TabController _topController;
   PageController _bottomController;
 
   @override
   void initState() {
+    super.initState();
+    _currentPageIndex = MyApp.homePageIndex;
+    _currentTopTabIndex = MyApp.topTabMoviesIndex;
+    _currentScreenIndex = MyApp.navigationScreenIndex;
     _topController = TabController(length: _topTabs.length, vsync: this);
     _bottomController = PageController(
-      initialPage: _currentIndex,
+      initialPage: _currentPageIndex,
     );
-    super.initState();
   }
 
-  void _handleOnPageChanged(int index) {
+  void _handleOnPageChanged(int pageIndex) {
     setState(() {
-      this._currentIndex = index;
+      this._currentPageIndex = pageIndex;
+      this._topController.animateTo(_currentTopTabIndex);
+    });
+  }
+
+  void _handleOnScreenChanged(int screenIndex) {
+    setState(() {
+      this._currentScreenIndex = screenIndex;
+      this._bottomController = PageController(
+        initialPage: _currentPageIndex,
+      );
+      this._topController.animateTo(_currentTopTabIndex);
+    });
+  }
+
+  void _handleOnTopTabChanged(int topTabIndex) {
+    setState(() {
+      this._currentTopTabIndex = topTabIndex;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+
+    Widget navigationScreen = Scaffold(
+      appBar: AppBar(title: Text("Anime App")),
       body: BodyMain(
         topTabs: _topTabs,
         onPageChanged: _handleOnPageChanged,
+        onScreenChanged: _handleOnScreenChanged,
+        onTopTabChanged: _handleOnTopTabChanged,
         topController: _topController,
         bottomController: _bottomController,
+        currentTopTabIndex: _currentTopTabIndex,
       ),
-      appBar: AppBar(title: Text("Anime App")),
       bottomNavigationBar: CustomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _currentPageIndex,
         bottomController: _bottomController,
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => {},
-        tooltip: 'Increment',
-        child: Icon(Icons.arrow_back),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      )
     );
+
+    Widget charactersScreen = CharactersScreen(onScreenChanged: this._handleOnScreenChanged);
+    Widget detailsScreen = DetailsScreen(onScreenChanged: this._handleOnScreenChanged);
+    Widget mainScreen;
+
+    if (_currentScreenIndex == MyApp.navigationScreenIndex)
+      mainScreen = navigationScreen;
+
+    if (_currentScreenIndex == MyApp.charactersScreenIndex)
+      mainScreen = charactersScreen;
+
+    if (_currentScreenIndex == MyApp.detailsScreenIndex)
+      mainScreen = detailsScreen;
+
+    return mainScreen;
   }
 }
