@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_anime_app/screens/CardRow.dart';
 
+
 class Home extends StatelessWidget {
 
   List<Widget> topTabs;
@@ -39,12 +40,8 @@ class Home extends StatelessWidget {
         ),
         Expanded(
             child: ListView(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(13),
               children: <Widget>[
-                new CardRow(),
-                new CardRow(),
-                new CardRow(),
-                new CardRow(),
                 new CardRow(),
                 new CardRow(),
 

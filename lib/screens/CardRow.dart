@@ -26,11 +26,12 @@ class CardRow extends StatelessWidget {
       ),
       alignment: FractionalOffset.centerLeft,
       child: new Image(
-        image: new AssetImage("lib/assets/img/mars.png"), // add a pic from the api data
+        image: new AssetImage("lib/assets/img/fma.jpg"), // add a pic from the api data
         height: 92.0,
         width: 92.0,
       ),
     );
+
     return new Container(
         height: 120.0,
         margin: const EdgeInsets.symmetric(
