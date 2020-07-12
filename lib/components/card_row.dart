@@ -6,6 +6,9 @@ class CardRow extends StatelessWidget {
 
   Anime anime;
   bool horizontal;
+
+  static const movieBackground = 0xFF333366;
+  static const seriesBackground = 0xFF4C1B1B;
   static const defaultThumbnailPath = "https://cdn.futura-sciences.com/buildsv6/images/mediumoriginal/6/9/5/69505b8d4b_50148813_fs10-veadeiros-cerrado.jpg";
 
   CardRow(this.anime, { this.horizontal = true });
@@ -13,6 +16,10 @@ class CardRow extends StatelessWidget {
 
   String _getAnimeTitle() {
     return anime.title != null ? anime.title : "Manga Ranked : ${anime.rank.toString()}";
+  }
+
+  int _getCardBackground() {
+    return anime.type == "Movie" ? movieBackground : seriesBackground;
   }
 
   @override
@@ -87,12 +94,14 @@ class CardRow extends StatelessWidget {
       ),
     );
 
+
+
     Widget container = Container(
       child: content,
       height: horizontal ? 170.0 : 154.0,
       margin: horizontal ? EdgeInsets.only(left: 40.0) : EdgeInsets.only(top: 72.0),
       decoration: BoxDecoration(
-        color: Color(0xFF333366),
+        color: Color(_getCardBackground()),
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: <BoxShadow>[
