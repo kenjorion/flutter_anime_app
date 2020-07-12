@@ -1,9 +1,4 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_anime_app/main.dart';
-import 'package:flutter_anime_app/models/anime.dart';
-import 'package:http/http.dart' as http;
 
 class FavoritePage extends StatefulWidget {
 
@@ -12,9 +7,16 @@ class FavoritePage extends StatefulWidget {
   TabController topController;
   Function(int) onScreenChanged;
   Function(int) onTopTabChanged;
+  FutureBuilder futureBuilderList;
 
   FavoritePage({
-    Key key, this.topTabs, this.topController, this.onScreenChanged, this.onTopTabChanged, this.currentTopTabIndex
+    Key key,
+    this.topTabs,
+    this.topController,
+    this.onScreenChanged,
+    this.onTopTabChanged,
+    this.currentTopTabIndex,
+    this.futureBuilderList
   }) : super(key: key);
 
   @override
@@ -23,124 +25,13 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage> {
 
-  Future<Anime> futureAnime;
-  Future<List> futureMoviesList;
-  Future<List> futureSeriesList;
-
-  Future<Anime> fetchAnime() async {
-    final response = await http.get('https://api.jikan.moe/v3/anime/1');
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return Anime.fromJson(json.decode(response.body));
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load anime');
-    }
-  }
-
-  Future<List> fetchMoviesList() async {
-    final response = await http.get('https://api.jikan.moe/v3/top/anime/1/movie');
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      Map<String, dynamic> responseResult = json.decode(response.body);
-      return (responseResult['top'] as List)
-          .map((data) => new Anime.fromJson(data))
-          .toList();
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load anime list (movies)');
-    }
-  }
-
-  Future<List> fetchSeriesList() async {
-    final response = await http.get('https://api.jikan.moe/v3/top/anime/1/tv');
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      Map<String, dynamic> responseResult = json.decode(response.body);
-      return (responseResult['top'] as List)
-          .map((data) => new Anime.fromJson(data))
-          .toList();
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load anime list (series)');
-    }
-  }
-
   @override
   void initState() {
     super.initState();
-    futureAnime = fetchAnime();
-    futureMoviesList = fetchMoviesList();
-    futureSeriesList = fetchSeriesList();
   }
 
   @override
   Widget build(BuildContext context) {
-
-    Widget futureBuilderMoviesList = FutureBuilder<List>(
-      future: futureMoviesList,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              Anime anime = snapshot.data[index];
-              return GestureDetector(
-                child: Text(anime.title),
-                onTap: () => {
-                  widget.onScreenChanged(MyApp.detailsScreenIndex)
-                },
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        // By default, show a loading spinner.
-        return Center(
-            child: CircularProgressIndicator()
-        );
-      },
-    );
-    Widget futureBuilderSeriesList = FutureBuilder<List>(
-      future: futureSeriesList,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              Anime anime = snapshot.data[index];
-              return GestureDetector(
-                child: Text(anime.title),
-                onTap: () => {
-                  widget.onScreenChanged(MyApp.detailsScreenIndex)
-                },
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        // By default, show a loading spinner.
-        return Center(
-            child: CircularProgressIndicator()
-        );
-      },
-    );
-    Widget futureBuilderResultList;
-
-    if (widget.currentTopTabIndex == MyApp.topTabMoviesIndex)
-      futureBuilderResultList = futureBuilderMoviesList;
-
-    if (widget.currentTopTabIndex == MyApp.topTabSeriesIndex)
-      futureBuilderResultList = futureBuilderSeriesList;
-
     return Column(
       children: <Widget>[
         Container(
@@ -169,7 +60,7 @@ class _FavoritePageState extends State<FavoritePage> {
         ),
         Expanded(
             flex: 3,
-            child: futureBuilderResultList
+            child: widget.futureBuilderList
         )
       ],
     );
