@@ -1,8 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_anime_app/main.dart';
 import 'package:flutter_anime_app/models/anime.dart';
+import 'package:flutter_anime_app/screens/CardRow.dart';
 import 'package:http/http.dart' as http;
 
 class FavoritePage extends StatefulWidget {
@@ -82,7 +82,6 @@ class _FavoritePageState extends State<FavoritePage> {
 
   @override
   Widget build(BuildContext context) {
-
     Widget futureBuilderMoviesList = FutureBuilder<List>(
       future: futureMoviesList,
       builder: (context, snapshot) {
@@ -92,7 +91,7 @@ class _FavoritePageState extends State<FavoritePage> {
             itemBuilder: (context, index) {
               Anime anime = snapshot.data[index];
               return GestureDetector(
-                child: Text(anime.title),
+                child: new CardRow(anime),
                 onTap: () => {
                   widget.onScreenChanged(MyApp.detailsScreenIndex)
                 },
@@ -117,7 +116,7 @@ class _FavoritePageState extends State<FavoritePage> {
             itemBuilder: (context, index) {
               Anime anime = snapshot.data[index];
               return GestureDetector(
-                child: Text(anime.title),
+                child: new CardRow(anime),
                 onTap: () => {
                   widget.onScreenChanged(MyApp.detailsScreenIndex)
                 },

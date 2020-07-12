@@ -45,6 +45,16 @@ flutter:
   assets:
     - lib/assets/img/mars.png
     - lib/assets/img/fma.jpg
+    - lib/assets/img/rank.png
+    - lib/assets/img/fav.png
+
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: lib/assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: lib/assets/fonts/Poppins-Regular.ttf
+          weight: 400
 
   # To add assets to your application, add an assets section, like this:
   # assets:

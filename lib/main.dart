@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_anime_app/components/custom_navigation_bar.dart';
 import 'package:flutter_anime_app/layouts/body_main.dart';
+import 'package:flutter_anime_app/models/anime.dart';
 import 'package:flutter_anime_app/screens/characters_screen.dart';
 import 'package:flutter_anime_app/screens/details_screen.dart';
 
@@ -50,6 +51,8 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   List<Widget> _topTabs = [ Tab(text: "Films"), Tab(text: "Séries") ];
   TabController _topController;
   PageController _bottomController;
+
+  Future<Anime> anime;
 
   @override
   void initState() {

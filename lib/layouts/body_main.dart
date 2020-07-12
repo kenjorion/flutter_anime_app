@@ -30,6 +30,7 @@ class BodyMain extends StatelessWidget {
         HomePage(
           topTabs: topTabs,
           topController: topController,
+          onScreenChanged: onScreenChanged,
           onTopTabChanged: onTopTabChanged,
           currentTopTabIndex: currentTopTabIndex,
         ),
