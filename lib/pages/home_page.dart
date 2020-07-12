@@ -1,9 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_anime_app/models/anime.dart';
-import 'package:flutter_anime_app/screens/CardRow.dart';
-import 'package:http/http.dart' as http;
-import 'package:flutter_anime_app/main.dart';
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:flutter_anime_app/components/card_row.dart';
+import 'package:flutter_anime_app/main.dart';
+import 'package:flutter_anime_app/models/anime.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
 
@@ -12,9 +12,16 @@ class HomePage extends StatefulWidget {
   TabController topController;
   Function(int) onScreenChanged;
   Function(int) onTopTabChanged;
+  FutureBuilder futureBuilderList;
 
   HomePage({
-    Key key, this.topTabs, this.topController, this.onScreenChanged, this.onTopTabChanged, this.currentTopTabIndex
+    Key key,
+    this.topTabs,
+    this.topController,
+    this.onScreenChanged,
+    this.onTopTabChanged,
+    this.currentTopTabIndex,
+    this.futureBuilderList
   }) : super(key: key);
 
   @override
@@ -23,30 +30,24 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  Future<Anime> futureAnime;
-  Future<List> futureMoviesList;
-  Future<List> futureSeriesList;
+  String searchTerm;
+  bool isSearchTerm;
+  FutureBuilder futureBuilderSearchList;
 
-  Future<Anime> fetchAnime() async {
-    final response = await http.get('https://api.jikan.moe/v3/anime/1');
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      return Anime.fromJson(json.decode(response.body));
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load anime');
-    }
+  @override
+  void initState() {
+    super.initState();
+    searchTerm = "";
+    isSearchTerm = false;
   }
 
-  Future<List> fetchMoviesList() async {
-    final response = await http.get('https://api.jikan.moe/v3/top/anime/1/movie');
+  Future<List> fetchSearchList() async {
+    String type = widget.currentTopTabIndex == MyApp.topTabMoviesIndex ? "movie" : "tv";
+    final response = await http.get('https://api.jikan.moe/v3/search/anime?q=$searchTerm&type=$type&page=1');
     if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
       Map<String, dynamic> responseResult = json.decode(response.body);
-      return (responseResult['top'] as List)
+
+      return (responseResult['results'] as List)
           .map((data) => new Anime.fromJson(data))
           .toList();
     } else {
@@ -56,89 +57,58 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-  Future<List> fetchSeriesList() async {
-    final response = await http.get('https://api.jikan.moe/v3/top/anime/1/tv');
-    if (response.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      Map<String, dynamic> responseResult = json.decode(response.body);
-      return (responseResult['top'] as List)
-          .map((data) => new Anime.fromJson(data))
-          .toList();
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load anime list (series)');
-    }
+  void _handleOnSearchButtonClick() {
+    setState(() {
+      isSearchTerm = searchTerm.length > 0;
+    });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    futureAnime = fetchAnime();
-    futureMoviesList = fetchMoviesList();
-    futureSeriesList = fetchSeriesList();
+  void _handleOnSearchInputChanged(String term) {
+    setState(() {
+      searchTerm = term;
+      if (searchTerm.trim().length == 0)
+        isSearchTerm = false;
+    });
+  }
+
+  Widget _buildFutureBuilderList(Future<List<dynamic>> futureList)
+  {
+    return FutureBuilder<List>(
+      future: futureList,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              Anime anime = snapshot.data[index];
+              return GestureDetector(
+                child: CardRow(anime),
+                onTap: () => {
+                  widget.onScreenChanged(MyApp.detailsScreenIndex)
+                },
+              );
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+              child: CircularProgressIndicator()
+          );
+        }
+        // By default, show a loading spinner.
+        return Center(
+            child: CircularProgressIndicator()
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    Widget futureBuilderMoviesList = FutureBuilder<List>(
-      future: futureMoviesList,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              Anime anime = snapshot.data[index];
-              return GestureDetector(
-                child: new CardRow(anime),
-                onTap: () => {
-                  widget.onScreenChanged(MyApp.detailsScreenIndex)
-                },
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        // By default, show a loading spinner.
-        return Center(
-            child: CircularProgressIndicator()
-        );
-      },
-    );
-    Widget futureBuilderSeriesList = FutureBuilder<List>(
-      future: futureSeriesList,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              Anime anime = snapshot.data[index];
-              return GestureDetector(
-                child: new CardRow(anime),
-                onTap: () => {
-                  widget.onScreenChanged(MyApp.detailsScreenIndex)
-                },
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Text("${snapshot.error}");
-        }
-        // By default, show a loading spinner.
-        return Center(
-            child: CircularProgressIndicator()
-        );
-      },
-    );
-    Widget futureBuilderResultList;
 
-    if (widget.currentTopTabIndex == MyApp.topTabMoviesIndex)
-      futureBuilderResultList = futureBuilderMoviesList;
+    Widget futureBuilderList = widget.futureBuilderList;
 
-    if (widget.currentTopTabIndex == MyApp.topTabSeriesIndex)
-      futureBuilderResultList = futureBuilderSeriesList;
+    if (isSearchTerm)
+      futureBuilderList = _buildFutureBuilderList(fetchSearchList());
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -167,27 +137,44 @@ class _HomePageState extends State<HomePage> {
             },
           ),
         ),
+        Container(
+          height: 50,
+          margin: EdgeInsets.all(20.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: <Widget>[
+              Expanded(
+                  flex: 10,
+                  child: TextFormField(
+                    decoration: InputDecoration(
+                        hintText: "Cherche ton anime",
+                        contentPadding: EdgeInsets.symmetric(horizontal: 10.0)
+                    ),
+                    onChanged: _handleOnSearchInputChanged,
+                  )
+              ),
+              Expanded(
+                  flex: 2,
+                  child: Center(
+                      child: Ink(
+                        decoration: const ShapeDecoration(
+                          color: Colors.lightBlue,
+                          shape: CircleBorder(),
+                        ),
+                        child: IconButton(
+                          icon: Icon(Icons.search),
+                          color: Colors.white,
+                          onPressed: _handleOnSearchButtonClick,
+                        ),
+                      )
+                  )
+              ),
+            ],
+          ),
+        ),
         Expanded(
-            flex: 3,
-            child: futureBuilderResultList
+            child: futureBuilderList
         )
-        /*Expanded(
-            child: ListView(
-                padding: const EdgeInsets.all(8),
-                children: <Widget>[
-                  //new CardRow(anime),
-                  //new CardRow(),
-                  //new CardRow(),
-                  //new CardRow(),
-
-                  Container(
-                    height: 100,
-                    color: Colors.amber[100],
-                    child: const Center(child: Text('Entry C')),
-                  ),
-                ]
-            )
-        )*/
       ],
     );
   }

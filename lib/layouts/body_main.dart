@@ -11,6 +11,7 @@ class BodyMain extends StatelessWidget {
   Function(int) onTopTabChanged;
   TabController topController;
   PageController bottomController;
+  FutureBuilder futureBuilderList;
 
   BodyMain({
     Key key,
@@ -20,7 +21,8 @@ class BodyMain extends StatelessWidget {
     this.onTopTabChanged,
     this.topController,
     this.bottomController,
-    this.currentTopTabIndex
+    this.currentTopTabIndex,
+    this.futureBuilderList
   }) : super(key: key);
 
   @override
@@ -33,6 +35,7 @@ class BodyMain extends StatelessWidget {
           onScreenChanged: onScreenChanged,
           onTopTabChanged: onTopTabChanged,
           currentTopTabIndex: currentTopTabIndex,
+          futureBuilderList: futureBuilderList,
         ),
         FavoritePage(
           topTabs: topTabs,
@@ -40,6 +43,7 @@ class BodyMain extends StatelessWidget {
           onScreenChanged: onScreenChanged,
           onTopTabChanged: onTopTabChanged,
           currentTopTabIndex: currentTopTabIndex,
+          futureBuilderList: futureBuilderList,
         )
       ],
       controller: bottomController,
