@@ -10,7 +10,6 @@ class HomePage extends StatefulWidget {
   List<Widget> topTabs;
   int currentTopTabIndex;
   TabController topController;
-  Function(int) onScreenChanged;
   Function(int) onTopTabChanged;
   FutureBuilder futureBuilderList;
   Function(String) onSearchTap;
@@ -19,7 +18,6 @@ class HomePage extends StatefulWidget {
     Key key,
     this.topTabs,
     this.topController,
-    this.onScreenChanged,
     this.onTopTabChanged,
     this.currentTopTabIndex,
     this.futureBuilderList,

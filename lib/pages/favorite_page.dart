@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_anime_app/main.dart';
 import 'package:flutter_anime_app/models/anime.dart';
 import 'package:flutter_anime_app/components/card_row.dart';
 import 'package:flutter_anime_app/providers/db_provider.dart';
 
 class FavoritePage extends StatefulWidget {
 
-  Function(int) onScreenChanged;
+  Function(int, Anime) onScreenChanged;
 
   FavoritePage({
     Key key,
@@ -35,7 +36,9 @@ class _FavoritePageState extends State<FavoritePage> {
   {
     return GestureDetector(
       child: CardRow(anime),
-      onTap: () => {},
+      onTap: () => {
+        widget.onScreenChanged(MyApp.detailsScreenIndex, anime)
+      },
     );
   }
 

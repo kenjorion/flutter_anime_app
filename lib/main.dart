@@ -172,6 +172,21 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     });
   }
 
+  void _handleOnScreenWithAnimeChanged(int screenIndex, Anime anime)
+  {
+    setState(() {
+      this._currentScreenIndex = screenIndex;
+      if (screenIndex == MyApp.detailsScreenIndex) {
+        this._currentAnime = anime;
+      } else {
+        this._bottomController = PageController(
+          initialPage: _currentPageIndex,
+        );
+        this._topController.animateTo(_currentTopTabIndex);
+      }
+    });
+  }
+
   void _handleOnTopTabChanged(int topTabIndex) {
     setState(() {
       this._currentTopTabIndex = topTabIndex;
@@ -251,8 +266,8 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       body: BodyMain(
         topTabs: _topTabs,
         onPageChanged: _handleOnPageChanged,
-        onScreenChanged: _handleOnScreenChanged,
         onTopTabChanged: _handleOnTopTabChanged,
+        onScreenAnimeChanged: _handleOnScreenWithAnimeChanged,
         topController: _topController,
         bottomController: _bottomController,
         currentTopTabIndex: _currentTopTabIndex,
