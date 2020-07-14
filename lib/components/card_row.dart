@@ -33,7 +33,7 @@ class CardRow extends StatelessWidget {
       int rank = anime.rank == null ? anime.id : anime.rank;
 
       return Row(
-        children: <Widget>[
+          children: <Widget>[
           Expanded(
               flex: horizontal ? 1 : 0,
               child: _getDetailsRowItem(
@@ -49,6 +49,17 @@ class CardRow extends StatelessWidget {
               )
           )
         ],
+      );
+    }
+
+    Widget _getDetailsRowForDetails() {
+      int rank = anime.rank == null ? anime.id : anime.rank;
+      return Row(
+          children: <Widget>[
+            _getDetailsRowItem(value: "Rank: ${rank.toString()}", icon: Icon(Icons.arrow_right, color: Colors.pink)),
+            Container(width: 8.0),
+            _getDetailsRowItem(value: "favourite", icon: Icon(Icons.arrow_right, color: Colors.pink)),
+          ]
       );
     }
 
@@ -82,14 +93,14 @@ class CardRow extends StatelessWidget {
               style: Style.subHeaderTextStyle
           ),
           _getBelowAnimeTypeSeparator(),
-          _getDetailsRow(),
+          horizontal ?_getDetailsRow() : _getDetailsRowForDetails(),
         ],
       ),
     );
 
     Widget container = Container(
       child: content,
-      height: horizontal ? 170.0 : 154.0,
+      height: horizontal ? 170.0 : 210.0,
       margin: horizontal ? EdgeInsets.only(left: 40.0) : EdgeInsets.only(top: 72.0),
       decoration: BoxDecoration(
         color: Color(0xFF333366),
@@ -107,8 +118,10 @@ class CardRow extends StatelessWidget {
 
     Widget thumbnail = Container(
       alignment: horizontal ? FractionalOffset.centerLeft : FractionalOffset.center,
-      margin: EdgeInsets.only(
-          left: 0.0, top: 0.0, bottom: 12.0
+      margin: horizontal ? EdgeInsets.only(
+          left: 0.0, top: 0.0, bottom: 12.0)
+          : EdgeInsets.only(
+          left: 0.0, top:0.0, bottom: 20.0
       ),
       child: Image(
         image: _getNetworkImage(), // add a pic from the api data

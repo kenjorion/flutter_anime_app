@@ -8,6 +8,8 @@ import 'package:flutter_anime_app/screens/details_screen.dart';
 import 'package:flutter_anime_app/screens/characters_screen.dart';
 import 'package:flutter_anime_app/components/custom_navigation_bar.dart';
 
+import 'models/anime_detail.dart';
+
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -48,6 +50,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateMixin {
 
   Anime _currentAnime;
+  AnimeDetail _currentAnimeDetail;
   int _currentPageIndex;
   int _currentScreenIndex;
   int _currentTopTabIndex;
@@ -57,6 +60,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   PageController _bottomController;
 
   Future<Anime> futureAnime;
+  Future<AnimeDetail> futureAnimeDetail;
   Future<List> futureMoviesList;
   Future<List> futureSeriesList;
 
@@ -72,8 +76,22 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
       initialPage: _currentPageIndex,
     );
     futureAnime = fetchAnime();
+    futureAnimeDetail = fetchAnimeDetail();
     futureMoviesList = fetchMoviesList();
     futureSeriesList = fetchSeriesList();
+  }
+
+  Future<AnimeDetail> fetchAnimeDetail() async {
+    final response = await http.get('https://api.jikan.moe/v3/anime/1');
+    if (response.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      return AnimeDetail.fromJson(json.decode(response.body));
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load anime');
+    }
   }
 
   Future<Anime> fetchAnime() async {
@@ -185,12 +203,16 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     Widget futureBuilderList;
     Widget futureBuilderMoviesList = _buildFutureBuilderList(futureMoviesList);
     Widget futureBuilderSeriesList = _buildFutureBuilderList(futureSeriesList);
+    Widget futureBuilderDetail = _buildFutureBuilderList(futureSeriesList);
+
+
 
     if (_currentTopTabIndex == MyApp.topTabMoviesIndex)
       futureBuilderList = futureBuilderMoviesList;
 
     if (_currentTopTabIndex == MyApp.topTabSeriesIndex)
       futureBuilderList = futureBuilderSeriesList;
+    
 
     Widget navigationScreen = Scaffold(
       appBar: AppBar(title: Text("Anime App")),
@@ -223,6 +245,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     if (_currentScreenIndex == MyApp.detailsScreenIndex)
       mainScreen = DetailsScreen(
           anime: _currentAnime,
+          animeDetail: _currentAnimeDetail,
           onScreenChanged: this._handleOnScreenChanged
       );
 

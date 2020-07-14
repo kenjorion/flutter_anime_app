@@ -4,15 +4,19 @@ import 'package:flutter_anime_app/components/style.dart';
 import 'package:flutter_anime_app/main.dart';
 import 'package:flutter_anime_app/models/anime.dart';
 import 'package:flutter_anime_app/components/card_row.dart';
+import 'package:flutter_anime_app/models/anime_detail.dart';
 
 class DetailsScreen extends StatelessWidget {
 
   Anime anime;
+  AnimeDetail animeDetail;
+
   Function(int) onScreenChanged;
 
   DetailsScreen({
     Key key,
     this.anime,
+    this.animeDetail,
     this.onScreenChanged,
   }) : super(key: key);
 
@@ -20,7 +24,7 @@ class DetailsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        constraints: BoxConstraints.expand(),
+        //constraints: BoxConstraints.expand(),
         color: Color(0xFF736AB7),
         child: Stack (
           children: <Widget>[
@@ -45,15 +49,15 @@ class DetailsScreen extends StatelessWidget {
     return Container(
       child: Image.network("https://upload.wikimedia.org/wikipedia/commons/thumb/4/4d/Orion_3008_huge.jpg/1024px-Orion_3008_huge.jpg",
         fit: BoxFit.cover,
-        height: 300.0,
+        height: 350.0,
       ),
-      constraints: BoxConstraints.expand(height: 295.0),
+      constraints: BoxConstraints.expand(height: 350.0),
     );
   }
 
   Container _getGradient() {
     return Container(
-      margin: EdgeInsets.only(top: 190.0),
+      margin: EdgeInsets.only(top: 240.0),
       height: 110.0,
       decoration: BoxDecoration(
         gradient: LinearGradient(
@@ -73,7 +77,7 @@ class DetailsScreen extends StatelessWidget {
     final _overviewTitle = "Overview".toUpperCase();
     return Container(
       child: ListView(
-        padding: EdgeInsets.fromLTRB(0.0, 72.0, 0.0, 32.0),
+        padding: EdgeInsets.fromLTRB(0.0, 180.0, 0.0, 32.0),
         children: <Widget>[
           CardRow(anime,
             horizontal: false,
@@ -87,7 +91,7 @@ class DetailsScreen extends StatelessWidget {
                   style: Style.headerTextStyle,),
                 Separator(),
                 Text(
-                    "hzhz", style: Style.commonTextStyle),
+                    "Summary : ", style: Style.commonTextStyle),
               ],
             ),
           ),
