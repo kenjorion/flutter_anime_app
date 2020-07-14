@@ -12,6 +12,7 @@ class BodyMain extends StatelessWidget {
   TabController topController;
   PageController bottomController;
   FutureBuilder futureBuilderList;
+  Function(String) onSearchTap;
 
   BodyMain({
     Key key,
@@ -22,7 +23,8 @@ class BodyMain extends StatelessWidget {
     this.topController,
     this.bottomController,
     this.currentTopTabIndex,
-    this.futureBuilderList
+    this.futureBuilderList,
+    this.onSearchTap
   }) : super(key: key);
 
   @override
@@ -36,14 +38,10 @@ class BodyMain extends StatelessWidget {
           onTopTabChanged: onTopTabChanged,
           currentTopTabIndex: currentTopTabIndex,
           futureBuilderList: futureBuilderList,
+          onSearchTap: onSearchTap
         ),
         FavoritePage(
-          topTabs: topTabs,
-          topController: topController,
-          onScreenChanged: onScreenChanged,
-          onTopTabChanged: onTopTabChanged,
-          currentTopTabIndex: currentTopTabIndex,
-          futureBuilderList: futureBuilderList,
+          onScreenChanged: onScreenChanged
         )
       ],
       controller: bottomController,

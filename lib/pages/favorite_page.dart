@@ -1,22 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_anime_app/models/anime.dart';
+import 'package:flutter_anime_app/components/card_row.dart';
+import 'package:flutter_anime_app/providers/db_provider.dart';
 
 class FavoritePage extends StatefulWidget {
 
-  List<Widget> topTabs;
-  int currentTopTabIndex;
-  TabController topController;
   Function(int) onScreenChanged;
-  Function(int) onTopTabChanged;
-  FutureBuilder futureBuilderList;
 
   FavoritePage({
     Key key,
-    this.topTabs,
-    this.topController,
     this.onScreenChanged,
-    this.onTopTabChanged,
-    this.currentTopTabIndex,
-    this.futureBuilderList
   }) : super(key: key);
 
   @override
@@ -25,42 +18,62 @@ class FavoritePage extends StatefulWidget {
 
 class _FavoritePageState extends State<FavoritePage> {
 
+  Future<List> futureAnimeList;
+
   @override
   void initState() {
     super.initState();
+    futureAnimeList = fetchAnimeList();
+  }
+
+  Future<List> fetchAnimeList() async {
+    List<Anime> list = await DBProvider.db.getAll();
+    return list;
+  }
+
+  Widget _getListItem(Anime anime)
+  {
+    return GestureDetector(
+      child: CardRow(anime),
+      onTap: () => {},
+    );
+  }
+
+  Widget _buildFutureBuilderList(Future<List<dynamic>> futureList)
+  {
+    return FutureBuilder<List>(
+      future: futureList,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            itemCount: snapshot.data.length,
+            itemBuilder: (context, index) {
+              Anime anime = snapshot.data[index];
+              return _getListItem(anime);
+            },
+          );
+        } else if (snapshot.hasError) {
+          return Center(
+              child: CircularProgressIndicator()
+          );
+        }
+        // By default, show a loading spinner.
+        return Center(
+            child: CircularProgressIndicator()
+        );
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Container(
-          height: 50,
-          decoration: BoxDecoration(
-              color: Colors.white,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.withOpacity(0.5),
-                  spreadRadius: 2,
-                  blurRadius: 2,
-                  offset: Offset(0, 1), // changes position of shadow
-                )
-              ]
-          ),
-          child: TabBar(
-              tabs: widget.topTabs,
-              controller: widget.topController,
-              labelColor: Theme.of(context).primaryColor,
-              indicatorColor: Theme.of(context).primaryColor,
-              unselectedLabelColor: Colors.grey,
-              onTap: (index) {
-                widget.onTopTabChanged(index);
-              },
-          ),
-        ),
         Expanded(
-            flex: 3,
-            child: widget.futureBuilderList
+            child: Container(
+              margin: EdgeInsets.only(top: 25.0),
+              child: _buildFutureBuilderList(futureAnimeList),
+            )
         )
       ],
     );

@@ -26,6 +26,7 @@ dependencies:
   cupertino_icons: ^0.1.2
   http: ^0.12.1
   cached_network_image: ^2.2.0+1
+  dio: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -47,6 +48,7 @@ flutter:
     - lib/assets/img/fma.jpg
     - lib/assets/img/rank.png
     - lib/assets/img/fav.png
+    - lib/assets/img/details_screen.jpg
 
   fonts:
     - family: Poppins

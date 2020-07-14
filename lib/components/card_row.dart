@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_anime_app/components/style.dart';
+import 'package:flutter_anime_app/main.dart';
 import 'package:flutter_anime_app/models/anime.dart';
 
 class CardRow extends StatelessWidget {
@@ -7,8 +8,6 @@ class CardRow extends StatelessWidget {
   Anime anime;
   bool horizontal;
 
-  static const movieBackground = 0xFF333366;
-  static const seriesBackground = 0xFF4C1B1B;
   static const defaultThumbnailPath = "https://cdn.futura-sciences.com/buildsv6/images/mediumoriginal/6/9/5/69505b8d4b_50148813_fs10-veadeiros-cerrado.jpg";
 
   CardRow(this.anime, { this.horizontal = true });
@@ -16,10 +15,6 @@ class CardRow extends StatelessWidget {
 
   String _getAnimeTitle() {
     return anime.title != null ? anime.title : "Manga Ranked : ${anime.rank.toString()}";
-  }
-
-  int _getCardBackground() {
-    return anime.type == "Movie" ? movieBackground : seriesBackground;
   }
 
   @override
@@ -41,19 +36,9 @@ class CardRow extends StatelessWidget {
 
       return Row(
         children: <Widget>[
-          Expanded(
-              flex: horizontal ? 1 : 0,
-              child: _getDetailsRowItem(
-                  value: "Rank: ${rank.toString()}",
-                  icon: Icon(Icons.arrow_right, color: Colors.pink)
-              )
-          ),
-          Expanded(
-              flex: horizontal ? 1 : 0,
-              child: _getDetailsRowItem(
-                  value: "Favorite",
-                  icon: Icon(Icons.arrow_right, color: Colors.pink)
-              )
+          _getDetailsRowItem(
+              value: "Rank: ${rank.toString()}",
+              icon: Icon(Icons.arrow_right, color: Colors.pink)
           )
         ],
       );
@@ -101,7 +86,7 @@ class CardRow extends StatelessWidget {
       height: horizontal ? 170.0 : 154.0,
       margin: horizontal ? EdgeInsets.only(left: 40.0) : EdgeInsets.only(top: 72.0),
       decoration: BoxDecoration(
-        color: Color(_getCardBackground()),
+        color: Color(MyApp.getAnimeTypeColor(anime)),
         shape: BoxShape.rectangle,
         borderRadius: BorderRadius.circular(8.0),
         boxShadow: <BoxShadow>[
@@ -120,7 +105,7 @@ class CardRow extends StatelessWidget {
           left: 0.0, top: 0.0, bottom: 12.0
       ),
       child: Image(
-        image: _getNetworkImage(), // add a pic from the api data
+        image: MyApp.getAnimeImage(anime), // add a pic from the api data
         width: 100.0,
         height: 100.0,
       ),

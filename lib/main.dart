@@ -13,6 +13,9 @@ void main() => runApp(MyApp());
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
 
+  static const String SERIES_TYPE = "TV";
+  static const String MOVIE_TYPE = "Movie";
+
   static const int navigationScreenIndex = 0;
   static const int detailsScreenIndex = 1;
   static const int charactersScreenIndex = 2;
@@ -23,14 +26,21 @@ class MyApp extends StatelessWidget {
   static const int topTabMoviesIndex = 0;
   static const int topTabSeriesIndex = 1;
 
+  static getAnimeImage(Anime anime) {
+    return NetworkImage(anime.image) != null ? NetworkImage(anime.image) : CardRow.defaultThumbnailPath;
+  }
+  static getAnimeTypeColor(Anime anime) {
+    return anime.type == SERIES_TYPE ? 0xFF4C1B1B : 0xFF333366;
+  }
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Anime App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'Flutter Demo Home Page'),
+      home: MyHomePage(title: 'Anime Home Page'),
     );
   }
 }
@@ -59,6 +69,10 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
   Future<Anime> futureAnime;
   Future<List> futureMoviesList;
   Future<List> futureSeriesList;
+  Future<List> futureSearchMoviesList;
+  Future<List> futureSearchSeriesList;
+
+  bool isSearchProcess;
 
   @override
   void initState() {
@@ -74,6 +88,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     futureAnime = fetchAnime();
     futureMoviesList = fetchMoviesList();
     futureSeriesList = fetchSeriesList();
+    isSearchProcess = false;
   }
 
   Future<Anime> fetchAnime() async {
@@ -121,10 +136,25 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     }
   }
 
+  Future<List> fetchSearchList(String term, String type) async {
+    final response = await http.get('https://api.jikan.moe/v3/search/anime?q=$term&type=${type.toLowerCase()}&page=1');
+    if (response.statusCode == 200) {
+      Map<String, dynamic> responseResult = json.decode(response.body);
+      return (responseResult['results'] as List)
+          .map((data) => new Anime.fromJson(data))
+          .toList();
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      throw Exception('Failed to load anime list (movies)');
+    }
+  }
+
   void _handleOnPageChanged(int pageIndex) {
     setState(() {
       this._currentPageIndex = pageIndex;
       this._topController.animateTo(_currentTopTabIndex);
+      this.isSearchProcess = false;
     });
   }
 
@@ -148,6 +178,24 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     });
   }
 
+  void _handleOnSearchTap(String term) {
+    setState(() {
+      this.isSearchProcess = true;
+      this.futureSearchMoviesList = fetchSearchList(term, MyApp.MOVIE_TYPE);
+      this.futureSearchSeriesList = fetchSearchList(term, MyApp.SERIES_TYPE);
+    });
+  }
+
+  Widget _getListItem(Anime anime)
+  {
+    return GestureDetector(
+      child: CardRow(anime),
+      onTap: () => {
+        _handleOnScreenChanged(MyApp.detailsScreenIndex, anime: anime)
+      },
+    );
+  }
+
   Widget _buildFutureBuilderList(Future<List<dynamic>> futureList)
   {
     return FutureBuilder<List>(
@@ -158,12 +206,7 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
             itemCount: snapshot.data.length,
             itemBuilder: (context, index) {
               Anime anime = snapshot.data[index];
-              return GestureDetector(
-                child: CardRow(anime),
-                onTap: () => {
-                  _handleOnScreenChanged(MyApp.detailsScreenIndex, anime: anime)
-                },
-              );
+              return _getListItem(anime);
             },
           );
         } else if (snapshot.hasError) {
@@ -186,11 +229,22 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
     Widget futureBuilderMoviesList = _buildFutureBuilderList(futureMoviesList);
     Widget futureBuilderSeriesList = _buildFutureBuilderList(futureSeriesList);
 
-    if (_currentTopTabIndex == MyApp.topTabMoviesIndex)
-      futureBuilderList = futureBuilderMoviesList;
+    if (this.isSearchProcess == false) {
 
-    if (_currentTopTabIndex == MyApp.topTabSeriesIndex)
-      futureBuilderList = futureBuilderSeriesList;
+      if (_currentTopTabIndex == MyApp.topTabMoviesIndex)
+        futureBuilderList = futureBuilderMoviesList;
+
+      if (_currentTopTabIndex == MyApp.topTabSeriesIndex)
+        futureBuilderList = futureBuilderSeriesList;
+
+    } else {
+
+      if (_currentTopTabIndex == MyApp.topTabMoviesIndex)
+        futureBuilderList = _buildFutureBuilderList(futureSearchMoviesList);
+
+      if (_currentTopTabIndex == MyApp.topTabSeriesIndex)
+        futureBuilderList = _buildFutureBuilderList(futureSearchSeriesList);
+    }
 
     Widget navigationScreen = Scaffold(
       appBar: AppBar(title: Text("Anime App")),
@@ -202,7 +256,8 @@ class _MyHomePageState extends State<MyHomePage> with SingleTickerProviderStateM
         topController: _topController,
         bottomController: _bottomController,
         currentTopTabIndex: _currentTopTabIndex,
-        futureBuilderList: futureBuilderList
+        futureBuilderList: futureBuilderList,
+        onSearchTap: _handleOnSearchTap,
       ),
       bottomNavigationBar: CustomNavigationBar(
         currentIndex: _currentPageIndex,

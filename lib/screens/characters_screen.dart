@@ -29,7 +29,6 @@ class CharactersScreen extends StatelessWidget {
         onPressed: () => {
           this.onScreenChanged(MyApp.detailsScreenIndex)
         },
-        tooltip: 'Increment',
         child: Icon(Icons.arrow_back),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

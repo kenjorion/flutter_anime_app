@@ -13,6 +13,7 @@ class HomePage extends StatefulWidget {
   Function(int) onScreenChanged;
   Function(int) onTopTabChanged;
   FutureBuilder futureBuilderList;
+  Function(String) onSearchTap;
 
   HomePage({
     Key key,
@@ -21,7 +22,8 @@ class HomePage extends StatefulWidget {
     this.onScreenChanged,
     this.onTopTabChanged,
     this.currentTopTabIndex,
-    this.futureBuilderList
+    this.futureBuilderList,
+    this.onSearchTap
   }) : super(key: key);
 
   @override
@@ -31,85 +33,21 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   String searchTerm;
-  bool isSearchTerm;
-  FutureBuilder futureBuilderSearchList;
 
   @override
   void initState() {
     super.initState();
     searchTerm = "";
-    isSearchTerm = false;
-  }
-
-  Future<List> fetchSearchList() async {
-    String type = widget.currentTopTabIndex == MyApp.topTabMoviesIndex ? "movie" : "tv";
-    final response = await http.get('https://api.jikan.moe/v3/search/anime?q=$searchTerm&type=$type&page=1');
-    if (response.statusCode == 200) {
-      Map<String, dynamic> responseResult = json.decode(response.body);
-
-      return (responseResult['results'] as List)
-          .map((data) => new Anime.fromJson(data))
-          .toList();
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      throw Exception('Failed to load anime list (movies)');
-    }
-  }
-
-  void _handleOnSearchButtonClick() {
-    setState(() {
-      isSearchTerm = searchTerm.length > 0;
-    });
   }
 
   void _handleOnSearchInputChanged(String term) {
     setState(() {
       searchTerm = term;
-      if (searchTerm.trim().length == 0)
-        isSearchTerm = false;
     });
-  }
-
-  Widget _buildFutureBuilderList(Future<List<dynamic>> futureList)
-  {
-    return FutureBuilder<List>(
-      future: futureList,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView.builder(
-            itemCount: snapshot.data.length,
-            itemBuilder: (context, index) {
-              Anime anime = snapshot.data[index];
-              return GestureDetector(
-                child: CardRow(anime),
-                onTap: () => {
-                  widget.onScreenChanged(MyApp.detailsScreenIndex)
-                },
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-          return Center(
-              child: CircularProgressIndicator()
-          );
-        }
-        // By default, show a loading spinner.
-        return Center(
-            child: CircularProgressIndicator()
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
-
-    Widget futureBuilderList = widget.futureBuilderList;
-
-    if (isSearchTerm)
-      futureBuilderList = _buildFutureBuilderList(fetchSearchList());
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: <Widget>[
@@ -164,7 +102,9 @@ class _HomePageState extends State<HomePage> {
                         child: IconButton(
                           icon: Icon(Icons.search),
                           color: Colors.white,
-                          onPressed: _handleOnSearchButtonClick,
+                          onPressed: () => {
+                            widget.onSearchTap(this.searchTerm)
+                          },
                         ),
                       )
                   )
@@ -173,7 +113,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
         Expanded(
-            child: futureBuilderList
+            child: widget.futureBuilderList
         )
       ],
     );
